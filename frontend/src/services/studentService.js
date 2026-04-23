@@ -8,13 +8,19 @@ const API_URL = import.meta.env.VITE_API_BASE_URL;
 
 /**
  * Helper to get authentication headers
+ * @param {boolean} isFormData - If true, skip Content-Type to let browser set boundary
  */
-const getAuthHeaders = () => {
+const getAuthHeaders = (isFormData = false) => {
   const token = localStorage.getItem('token');
-  return {
-    'Content-Type': 'application/json',
+  const headers = {
     ...(token ? { 'Authorization': `Bearer ${token}` } : {})
   };
+
+  if (!isFormData) {
+    headers['Content-Type'] = 'application/json';
+  }
+
+  return headers;
 };
 
 /**
@@ -53,21 +59,21 @@ export const studentService = {
   },
 
   // CREATE student
-  createStudent: async (studentData) => {
+  createStudent: async (formData) => {
     const response = await fetch(API_URL, {
       method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(studentData),
+      headers: getAuthHeaders(true), // true indicates we are sending FormData
+      body: formData, // Send FormData directly, do not JSON.stringify
     });
     return await handleResponse(response);
   },
 
   // UPDATE student
-  updateStudent: async (id, studentData) => {
+  updateStudent: async (id, formData) => {
     const response = await fetch(`${API_URL}/${id}`, {
       method: 'PUT',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(studentData),
+      headers: getAuthHeaders(true), // true indicates we are sending FormData
+      body: formData, // Send FormData directly, do not JSON.stringify
     });
     return await handleResponse(response);
   },
