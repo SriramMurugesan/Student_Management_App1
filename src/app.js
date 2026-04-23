@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const cors = require('cors');
 const logger = require('./middlewares/logger');
 const { globalErrorHandler, notFoundHandler } = require('./middlewares/errorMiddleware');
 const studentRoutes = require('./routes/student.routes');
@@ -13,7 +14,14 @@ const app = express();
 // 1. Body Parser (to handle JSON data in requests)
 app.use(express.json());
 
-// 2. Custom Logger Middleware
+// 2. CORS (to allow cross-origin requests)
+app.use(cors({
+  origin: '*', // Allow all origins for this demo environment
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// 3. Custom Logger Middleware
 app.use(logger);
 
 // 3. Health Check Route

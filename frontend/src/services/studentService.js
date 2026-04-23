@@ -1,74 +1,72 @@
 /**
- * Mock Student Service
- * This service simulates backend API calls using local storage and timeouts.
- * Structure is ready to be swapped with real fetch/axios calls later.
+ * Real Student Service
+ * Connects to the Node.js backend using the Fetch API.
+ * Uses environment variables for the API base URL.
  */
 
-const STORAGE_KEY = 'mock_students';
+const API_URL = import.meta.env.VITE_API_BASE_URL;
 
-const initialStudents = [
-  { id: '1', name: 'Sriram Murugesan', age: 24, course: 'Full Stack Development', createdAt: new Date().toISOString() },
-  { id: '2', name: 'John Doe', age: 22, course: 'Computer Science', createdAt: new Date().toISOString() },
-  { id: '3', name: 'Jane Smith', age: 21, course: 'Mathematics', createdAt: new Date().toISOString() },
-];
-
-// Initialize storage if empty
-if (!localStorage.getItem(STORAGE_KEY)) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(initialStudents));
-}
-
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+/**
+ * Helper to handle fetch responses and parse errors
+ */
+const handleResponse = async (response) => {
+  const data = await response.json();
+  
+  if (!response.ok) {
+    // Collect error messages from backend validation or general errors
+    const errorMsg = data.message || 'Something went wrong';
+    throw new Error(errorMsg);
+  }
+  
+  return data;
+};
 
 export const studentService = {
   // GET all students
-  getAllStudents: async () => {
-    await sleep(800); // Simulate network delay
-    const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    return { status: 'success', data: { students: data, total: data.length } };
+  getAllStudents: async (query = {}) => {
+    // Construct query parameters if any (name, page, limit)
+    const params = new URLSearchParams(query).toString();
+    const url = params ? `${API_URL}?${params}` : API_URL;
+
+    const response = await fetch(url);
+    return await handleResponse(response);
   },
 
   // GET student by ID
   getStudentById: async (id) => {
-    await sleep(500);
-    const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    const student = data.find(s => s.id === id);
-    if (!student) throw new Error('Student not found');
-    return { status: 'success', data: student };
+    const response = await fetch(`${API_URL}/${id}`);
+    return await handleResponse(response);
   },
 
   // CREATE student
   createStudent: async (studentData) => {
-    await sleep(1000);
-    const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    const newStudent = {
-      ...studentData,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString()
-    };
-    const updatedData = [...data, newStudent];
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedData));
-    return { status: 'success', data: newStudent };
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(studentData),
+    });
+    return await handleResponse(response);
   },
 
   // UPDATE student
   updateStudent: async (id, studentData) => {
-    await sleep(1000);
-    const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    const index = data.findIndex(s => s.id === id);
-    if (index === -1) throw new Error('Student not found');
-    
-    const updatedStudent = { ...data[index], ...studentData };
-    data[index] = updatedStudent;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    return { status: 'success', data: updatedStudent };
+    const response = await fetch(`${API_URL}/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(studentData),
+    });
+    return await handleResponse(response);
   },
 
   // DELETE student
   deleteStudent: async (id) => {
-    await sleep(800);
-    const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    const updatedData = data.filter(s => s.id !== id);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedData));
-    return { status: 'success', message: 'Student deleted successfully' };
+    const response = await fetch(`${API_URL}/${id}`, {
+      method: 'DELETE',
+    });
+    return await handleResponse(response);
   }
 };
