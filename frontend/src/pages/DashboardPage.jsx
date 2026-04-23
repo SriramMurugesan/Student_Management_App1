@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Search, RefreshCw, GraduationCap } from 'lucide-react';
+import { io } from 'socket.io-client';
 import { studentService } from '../services/studentService';
 import StudentCard from '../components/StudentCard';
 import Button from '../components/Button';
@@ -25,6 +26,25 @@ const DashboardPage = () => {
 
   useEffect(() => {
     fetchStudents();
+
+    // Initialize Socket.IO connection
+    const socket = io(import.meta.env.VITE_API_BASE_URL.replace('/api/students', ''));
+
+    socket.on('student:created', (newStudent) => {
+      setStudents(prev => [...prev, newStudent]);
+    });
+
+    socket.on('student:updated', (updatedStudent) => {
+      setStudents(prev => prev.map(s => s.id === updatedStudent.id ? updatedStudent : s));
+    });
+
+    socket.on('student:deleted', (id) => {
+      setStudents(prev => prev.filter(s => s.id !== id));
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
   const handleDelete = async (id) => {

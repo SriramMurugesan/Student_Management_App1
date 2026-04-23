@@ -9,8 +9,14 @@ const StudentCard = ({ student, onEdit, onDelete }) => {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all group">
       <div className="flex justify-between items-start mb-4">
-        <div className="bg-primary-50 p-3 rounded-full group-hover:bg-primary-100 transition-colors">
-          <User className="text-primary-600 w-6 h-6" />
+        <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-gray-50 flex-shrink-0">
+          {student.profileImage ? (
+            <img src={student.profileImage} alt={student.name} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full bg-primary-50 flex items-center justify-center">
+              <User className="text-primary-600 w-6 h-6" />
+            </div>
+          )}
         </div>
         <div className="flex space-x-2">
           <Button 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, BookOpen, Hash, Save, X } from 'lucide-react';
+import { User, BookOpen, Hash, Save, X, Camera, Loader2 } from 'lucide-react';
 import Button from './Button';
 
 /**
@@ -12,6 +12,8 @@ const StudentForm = ({ initialData, onSubmit, onCancel, isLoading }) => {
     age: '',
     course: ''
   });
+  const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
@@ -21,6 +23,9 @@ const StudentForm = ({ initialData, onSubmit, onCancel, isLoading }) => {
         age: initialData.age || '',
         course: initialData.course || ''
       });
+      if (initialData.profileImage) {
+        setImagePreview(initialData.profileImage);
+      }
     }
   }, [initialData]);
 
@@ -47,10 +52,29 @@ const StudentForm = ({ initialData, onSubmit, onCancel, isLoading }) => {
     }
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (validate()) {
-      onSubmit(formData);
+      const data = new FormData();
+      data.append('name', formData.name);
+      data.append('age', formData.age);
+      data.append('course', formData.course);
+      if (image) {
+        data.append('image', image);
+      }
+      onSubmit(data);
     }
   };
 
@@ -59,6 +83,32 @@ const StudentForm = ({ initialData, onSubmit, onCancel, isLoading }) => {
   return (
     <form onSubmit={handleSubmit} className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 max-w-2xl mx-auto">
       <div className="space-y-6">
+        {/* Profile Image Upload */}
+        <div className="flex flex-col items-center mb-8">
+          <div className="relative group">
+            <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-100 border-4 border-white shadow-md relative">
+              {imagePreview ? (
+                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-gray-300">
+                  <User size={64} />
+                </div>
+              )}
+            </div>
+            <label className="absolute bottom-0 right-0 bg-primary-600 p-2.5 rounded-full text-white cursor-pointer shadow-lg hover:bg-primary-700 transition-colors group-hover:scale-110">
+              <Camera size={20} />
+              <input 
+                type="file" 
+                className="hidden" 
+                accept="image/*" 
+                onChange={handleImageChange}
+                disabled={isLoading}
+              />
+            </label>
+          </div>
+          <p className="text-xs text-gray-400 mt-3">Upload student profile photo (JPG, PNG)</p>
+        </div>
+
         {/* Name Field */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>

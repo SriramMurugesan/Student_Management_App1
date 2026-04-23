@@ -22,6 +22,14 @@ const studentSchema = new mongoose.Schema(
       required: [true, 'A student must have a course'],
       trim: true,
     },
+    profileImage: {
+      type: String,
+      default: null,
+    },
+    cloudinaryId: {
+      type: String,
+      default: null,
+    },
     createdAt: {
       type: Date,
       default: Date.now,

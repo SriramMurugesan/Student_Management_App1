@@ -2,6 +2,7 @@ const express = require('express');
 const studentController = require('../controllers/student.controller');
 const { validateStudentInput } = require('../middlewares/validator');
 const { protect } = require('../middlewares/auth.middleware');
+const upload = require('../middlewares/upload.middleware');
 
 const router = express.Router();
 
@@ -17,13 +18,13 @@ router.use(protect);
 router
   .route('/')
   .get(studentController.getAllStudents)
-  .post(validateStudentInput, studentController.createStudent);
+  .post(upload.single('image'), validateStudentInput, studentController.createStudent);
 
 // Route for getting, updating, and deleting a specific student by ID
 router
   .route('/:id')
   .get(studentController.getStudentById)
-  .put(validateStudentInput, studentController.updateStudent)
+  .put(upload.single('image'), validateStudentInput, studentController.updateStudent)
   .delete(studentController.deleteStudent);
 
 module.exports = router;
