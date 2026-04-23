@@ -1,8 +1,12 @@
 const express = require('express');
 const studentController = require('../controllers/student.controller');
 const { validateStudentInput } = require('../middlewares/validator');
+const { protect } = require('../middlewares/auth.middleware');
 
 const router = express.Router();
+
+// Apply protection to all routes below this middleware
+router.use(protect);
 
 /**
  * Student Routes

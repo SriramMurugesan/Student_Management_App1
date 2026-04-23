@@ -1,17 +1,28 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { GraduationCap, LayoutDashboard, Home, UserPlus } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { GraduationCap, LayoutDashboard, Home, UserPlus, LogIn, UserPlus2, LogOut } from 'lucide-react';
+import { authService } from '../services/authService';
 
 /**
  * Responsive Navigation Bar with Glassmorphism effect.
  */
 const Navbar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const user = authService.getCurrentUser();
+
+  const handleLogout = () => {
+    authService.logout();
+    navigate('/login');
+    window.location.reload();
+  };
 
   const navLinks = [
     { name: 'Home', path: '/', icon: Home },
-    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Add Student', path: '/add', icon: UserPlus },
+    ...(user ? [
+      { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+      { name: 'Add Student', path: '/add', icon: UserPlus },
+    ] : []),
   ];
 
   return (
@@ -49,6 +60,38 @@ const Navbar = () => {
                 </Link>
               );
             })}
+          </div>
+
+          {/* Auth Buttons */}
+          <div className="hidden md:flex items-center space-x-4">
+            {!user ? (
+              <>
+                <Link to="/login" className="flex items-center space-x-1.5 text-sm font-medium text-gray-500 hover:text-primary-600 transition-colors">
+                  <LogIn className="w-4 h-4" />
+                  <span>Login</span>
+                </Link>
+                <Link to="/signup" className="bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors flex items-center space-x-1.5">
+                  <UserPlus2 className="w-4 h-4" />
+                  <span>Sign Up</span>
+                </Link>
+              </>
+            ) : (
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2 mr-2 pr-4 border-r border-gray-200">
+                  <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold text-xs">
+                    {user.name.charAt(0).toUpperCase()}
+                  </div>
+                  <span className="text-sm font-medium text-gray-700">{user.name}</span>
+                </div>
+                <button 
+                  onClick={handleLogout}
+                  className="flex items-center space-x-1.5 text-sm font-medium text-gray-500 hover:text-red-600 transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Logout</span>
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Mobile Menu Trigger (Placeholder) */}

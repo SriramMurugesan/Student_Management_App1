@@ -4,6 +4,7 @@ const cors = require('cors');
 const logger = require('./middlewares/logger');
 const { globalErrorHandler, notFoundHandler } = require('./middlewares/errorMiddleware');
 const studentRoutes = require('./routes/student.routes');
+const authRoutes = require('./routes/auth.routes');
 
 const app = express();
 
@@ -29,7 +30,8 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'success', message: 'Server is healthy' });
 });
 
-// 4. Student Routes
+// 4. Student & Auth Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/students', studentRoutes);
 
 // 5. 404 handler (must be after all routes)

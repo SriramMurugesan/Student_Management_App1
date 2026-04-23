@@ -7,6 +7,17 @@
 const API_URL = import.meta.env.VITE_API_BASE_URL;
 
 /**
+ * Helper to get authentication headers
+ */
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+  };
+};
+
+/**
  * Helper to handle fetch responses and parse errors
  */
 const handleResponse = async (response) => {
@@ -27,14 +38,17 @@ export const studentService = {
     // Construct query parameters if any (name, page, limit)
     const params = new URLSearchParams(query).toString();
     const url = params ? `${API_URL}?${params}` : API_URL;
-
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers: getAuthHeaders()
+    });
     return await handleResponse(response);
   },
 
   // GET student by ID
   getStudentById: async (id) => {
-    const response = await fetch(`${API_URL}/${id}`);
+    const response = await fetch(`${API_URL}/${id}`, {
+      headers: getAuthHeaders()
+    });
     return await handleResponse(response);
   },
 
@@ -42,9 +56,7 @@ export const studentService = {
   createStudent: async (studentData) => {
     const response = await fetch(API_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify(studentData),
     });
     return await handleResponse(response);
@@ -54,9 +66,7 @@ export const studentService = {
   updateStudent: async (id, studentData) => {
     const response = await fetch(`${API_URL}/${id}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify(studentData),
     });
     return await handleResponse(response);
@@ -66,6 +76,7 @@ export const studentService = {
   deleteStudent: async (id) => {
     const response = await fetch(`${API_URL}/${id}`, {
       method: 'DELETE',
+      headers: getAuthHeaders()
     });
     return await handleResponse(response);
   }

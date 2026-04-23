@@ -1,9 +1,19 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import LandingPage from './pages/LandingPage';
 import DashboardPage from './pages/DashboardPage';
 import FormPage from './pages/FormPage';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+
+/**
+ * Protected Route Component
+ */
+const PrivateRoute = ({ children }) => {
+  const token = localStorage.getItem('token');
+  return token ? children : <Navigate to="/login" />;
+};
 
 /**
  * Main Application Component
@@ -18,9 +28,26 @@ function App() {
         <main className="animate-in fade-in duration-500">
           <Routes>
             <Route path="/" element={<LandingPage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/add" element={<FormPage />} />
-            <Route path="/edit/:id" element={<FormPage />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            
+            <Route path="/dashboard" element={
+              <PrivateRoute>
+                <DashboardPage />
+              </PrivateRoute>
+            } />
+            
+            <Route path="/add" element={
+              <PrivateRoute>
+                <FormPage />
+              </PrivateRoute>
+            } />
+            
+            <Route path="/edit/:id" element={
+              <PrivateRoute>
+                <FormPage />
+              </PrivateRoute>
+            } />
             
             {/* Fallback Route */}
             <Route path="*" element={
